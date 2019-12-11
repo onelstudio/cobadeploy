@@ -1,49 +1,95 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-
-    <title>Azure App Service - Sample Static HTML Site</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-  </head>
-
-  <body>
-    <div class="navbar-wrapper">
-      <div class="container">
-          <h1>Azure App Service - Sample Static HTML Site</h1>
-          <hr/>
-      </div>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyze Sample</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+</head>
+<body>
+ 
+<script type="text/javascript">
+    function processImage() {
+        // **********************************************
+        // *** Update or verify the following values. ***
+        // **********************************************
+ 
+        // Replace <Subscription Key> with your valid subscription key.
+        var subscriptionKey = "4f928fc8df664785a86a87c3e1b79422";
+ 
+        // You must use the same Azure region in your REST API method as you used to
+        // get your subscription keys. For example, if you got your subscription keys
+        // from the West US region, replace "westcentralus" in the URL
+        // below with "westus".
+        //
+        // Free trial subscription keys are generated in the "westus" region.
+        // If you use a free trial subscription key, you shouldn't need to change
+        // this region.
+        var uriBase =
+        "https://southeastasia.api.cognitive.microsoft.com/vision/v2.0/analyze";;
+ 
+        // Request parameters.
+        var params = {
+            "visualFeatures": "Categories,Description,Color",
+            "details": "",
+            "language": "en",
+        };
+ 
+        // Display the image.
+        var sourceImageUrl = document.getElementById("inputImage").value;
+        document.querySelector("#sourceImage").src = sourceImageUrl;
+ 
+        // Make the REST API call.
+        $.ajax({
+            url: uriBase + "?" + $.param(params),
+ 
+            // Request headers.
+            beforeSend: function(xhrObj){
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader(
+                    "Ocp-Apim-Subscription-Key", subscriptionKey);
+            },
+ 
+            type: "POST",
+ 
+            // Request body.
+            data: '{"url": ' + '"' + sourceImageUrl + '"}',
+        })
+ 
+        .done(function(data) {
+            // Show formatted JSON on webpage.
+            $("#responseTextArea").val(JSON.stringify(data, null, 2));
+        })
+ 
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            // Display error message.
+            var errorString = (errorThrown === "") ? "Error. " :
+                errorThrown + " (" + jqXHR.status + "): ";
+            errorString += (jqXHR.responseText === "") ? "" :
+                jQuery.parseJSON(jqXHR.responseText).message;
+            alert(errorString);
+        });
+    };
+</script>
+ 
+<h1>Analyze image:</h1>
+Enter the URL to an image, then click the <strong>Analyze image</strong> button.
+<br><br>
+Image to analyze:
+<input type="text" name="inputImage" id="inputImage"
+    value="http://upload.wikimedia.org/wikipedia/commons/3/3c/Shaki_waterfall.jpg" />
+<button onclick="processImage()">Analyze image</button>
+<br><br>
+<div id="wrapper" style="width:1020px; display:table;">
+    <div id="jsonOutput" style="width:600px; display:table-cell;">
+        Response:
+        <br><br>
+        <textarea id="responseTextArea" class="UIInput"
+                  style="width:580px; height:400px;"></textarea>
     </div>
-
-    <!-- Wrap the rest of the page in another container to center all the content. -->
-
-    <div class="container">
-        
-      <div class="row">
-        <div class="col-xs-12 col-sm-6">
-          <img class="img-rectangle" src="img/azure-portal.png" alt="Azure App Service Web Apps" height="140">
-          <h2>Azure App Service Web Apps</h2>
-          <p>App Service Web Apps is a fully managed compute platform that is optimized for hosting websites and web applications. This platform-as-a-service (PaaS) offering of Microsoft Azure lets you focus on your business logic while Azure takes care of the infrastructure to run and scale your apps.</p>
-        </div>
-          <div class="col-xs-12 col-sm-6">
-              <img class="img-rectangle" src="img/cdn.png" alt="CDN" height="140">
-              <h2>Azure Content Delivery Network (CDN)</h2>
-              <p>The Azure Content Delivery Network (CDN) caches static web content at strategically placed locations to provide maximum throughput for delivering content to users. The CDN offers developers a global solution for delivering high-bandwidth content by caching the content at physical nodes across the world.</p>
-          </div>
-      </div>
+    <div id="imageDiv" style="width:420px; display:table-cell;">
+        Source image:
+        <br><br>
+        <img id="sourceImage" width="400" />
     </div>
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="js/bootstrap.min.js"></script>
-  </body>
+</div>
+</body>
 </html>
